@@ -6,7 +6,8 @@ export default function PlayPage() {
   const [selected, setSelected] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [step, setStep] = useState(1);
-  const tableCards = [1, 7, 4];
+  // Scopa starts with four face-up cards on the table.
+  const tableCards = [1, 7, 4, 2];
   const handCards = [1, 5, 7];
   const canCapture = (value: number) => {
     // In Scopa, an equal-value table card is captured directly; otherwise
