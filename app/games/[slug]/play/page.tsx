@@ -11,6 +11,7 @@ export default function ScopaPlayPage() {
   const [step, setStep] = useState(1);
   const [phase, setPhase] = useState<Phase>("choose");
   const [score, setScore] = useState(0);
+  const [tableCards, setTableCards] = useState(SCOPA_TABLE);
   const selectedValue = selected === null ? null : SCOPA_HAND[selected];
   const captureTarget = selectedValue === null
     ? null
@@ -42,8 +43,13 @@ export default function ScopaPlayPage() {
   useEffect(() => {
     if (step !== 1 || phase === "choose" || phase === "score") return;
     const timer = window.setTimeout(() => {
-      setPhase((current) => current === "play" ? "capture" : "score");
-      if (phase === "capture") setScore((current) => current + 1);
+      if (phase === "play") {
+        setPhase("capture");
+        return;
+      }
+      setTableCards((cards) => cards.filter((_, index) => !captureIndices.includes(index)));
+      setScore((current) => current + 1);
+      setPhase("score");
     }, phase === "play" ? 700 : 850);
     return () => window.clearTimeout(timer);
   }, [phase, step]);
@@ -67,7 +73,7 @@ export default function ScopaPlayPage() {
       <div className="table" aria-live="polite">
         <div className="table-top"><span>SCOPA · 新手桌</span><span>第 {step} / 3 步</span></div>
         <div className="instruction">{instruction}<small>目标：完成一次完整的出牌、吃牌和得分。</small></div>
-        <div className="table-cards center">{SCOPA_TABLE.map((x, i) => <div key={i} className={`playing-card ${i === 0 ? "red" : ""} ${phase === "capture" && captureIndices.includes(i) ? "capturing" : ""}`}>{x === 1 ? "A" : x}<small>♠</small></div>)}</div>
+        <div className="table-cards center">{tableCards.map((x, i) => <div key={`${x}-${i}`} className={`playing-card ${x === 1 ? "red" : ""} ${phase === "capture" && captureIndices.includes(i) ? "capturing" : ""}`}>{x === 1 ? "A" : x}<small>♠</small></div>)}</div>
         <div className="table-cards hand">{SCOPA_HAND.map((x, i) => <button aria-label={`选择 ${x === 1 ? "A" : x} 点牌`} key={i} style={selected === i && captureTarget !== null ? { "--fly-x": `${(captureTarget - i) * 78}px` } as CSSProperties : undefined} className={`playing-card ${canCapture(SCOPA_TABLE, x) ? "glow" : ""} ${selected === i ? `picked ${phase === "play" ? "flying" : ""}` : ""}`} onClick={() => chooseCard(i)}>{x === 1 ? "A" : x}<small>♠</small></button>)}</div>
         {step === 1 && phase === "score" && <div className="score-pop">+1</div>}
         {step === 1 && phase === "score" && <div className="hero-actions"><button className="btn primary" onClick={() => setStep(2)}>进入第 2 步 →</button></div>}
