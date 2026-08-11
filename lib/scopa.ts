@@ -1,4 +1,5 @@
-export const SCOPA_TABLE = [1, 7, 4];
+// Scopa starts with four face-up cards on the table.
+export const SCOPA_TABLE = [1, 7, 4, 2];
 export const SCOPA_HAND = [1, 5, 7];
 export function canCapture(table: number[], value: number) {
   const search = (cards: number[], target: number, start = 0): boolean => {
