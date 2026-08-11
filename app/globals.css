@@ -96,11 +96,11 @@ footer { padding-block: var(--space-6); border-color: var(--line); }
 }
 
 .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
-.playing-card.playing { animation: card-play .55s ease-out; }
+.playing-card.flying { animation: card-fly .7s ease-in-out forwards; z-index:3; }
 .playing-card.capturing { animation: card-capture .65s ease-in-out; }
 .score-pop { color:var(--lime); font:bold 28px Georgia; text-align:center; animation: score-rise .8s ease-out; }
 .score-pulse { display:inline-block; animation: score-pulse .55s ease-out; }
-@keyframes card-play { from { transform:translateY(28px) scale(.9); opacity:.35; } to { transform:translateY(-10px) scale(1); opacity:1; } }
+@keyframes card-fly { from { transform:translateY(-10px) scale(1); opacity:1; } to { transform:translate(var(--fly-x), -145px) scale(.72); opacity:.25; } }
 @keyframes card-capture { 50% { transform:translateY(-14px) scale(1.08); opacity:.75; } to { transform:translateY(10px) scale(.65); opacity:.2; } }
 @keyframes score-rise { from { transform:translateY(18px) scale(.7); opacity:0; } to { transform:translateY(0) scale(1); opacity:1; } }
 @keyframes score-pulse { 50% { transform:scale(1.5); color:#fff; } to { transform:scale(1); } }

@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-html-link-for-pages */
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { canCapture, SCOPA_HAND, SCOPA_TABLE } from "../../../../lib/scopa";
 
 type Phase = "choose" | "play" | "capture" | "score";
@@ -11,6 +11,12 @@ export default function ScopaPlayPage() {
   const [step, setStep] = useState(1);
   const [phase, setPhase] = useState<Phase>("choose");
   const [score, setScore] = useState(0);
+  const selectedValue = selected === null ? null : SCOPA_HAND[selected];
+  const captureTarget = selectedValue === null
+    ? null
+    : SCOPA_TABLE.findIndex((card) => card === selectedValue) >= 0
+      ? SCOPA_TABLE.findIndex((card) => card === selectedValue)
+      : SCOPA_TABLE.findIndex((card) => card < selectedValue);
   const chooseCard = (index: number) => {
     if (step !== 1 || phase !== "choose") return;
     setSelected(index);
@@ -33,7 +39,7 @@ export default function ScopaPlayPage() {
       : phase === "choose"
         ? "从手牌中选择一张牌"
         : phase === "play"
-          ? "出牌成功！现在点击“吃牌”。"
+          ? "出牌成功！接下来会自动吃牌。"
           : phase === "capture"
             ? "选择的牌可以吃掉桌面上的组合。"
             : "得分！捕获的牌已计入你的分数。";
@@ -45,8 +51,8 @@ export default function ScopaPlayPage() {
       <div className="table" aria-live="polite">
         <div className="table-top"><span>SCOPA · 新手桌</span><span>第 {step} / 3 步</span></div>
         <div className="instruction">{instruction}<small>目标：完成一次完整的出牌、吃牌和得分。</small></div>
-        <div className="table-cards center">{SCOPA_TABLE.map((x, i) => <div key={i} className={`playing-card mini ${i === 0 ? "red" : ""} ${phase === "capture" ? "capturing" : ""}`}>{x === 1 ? "A" : x}<small>♠</small></div>)}</div>
-        <div className="table-cards hand">{SCOPA_HAND.map((x, i) => <button aria-label={`选择 ${x === 1 ? "A" : x} 点牌`} key={i} className={`playing-card ${canCapture(SCOPA_TABLE, x) ? "glow" : ""} ${selected === i ? `picked ${phase === "play" ? "playing" : ""}` : ""}`} onClick={() => chooseCard(i)}>{x === 1 ? "A" : x}<small>♠</small></button>)}</div>
+        <div className="table-cards center">{SCOPA_TABLE.map((x, i) => <div key={i} className={`playing-card ${i === 0 ? "red" : ""} ${phase === "capture" ? "capturing" : ""}`}>{x === 1 ? "A" : x}<small>♠</small></div>)}</div>
+        <div className="table-cards hand">{SCOPA_HAND.map((x, i) => <button aria-label={`选择 ${x === 1 ? "A" : x} 点牌`} key={i} style={selected === i && captureTarget !== null ? { "--fly-x": `${(captureTarget - i) * 78}px` } as CSSProperties : undefined} className={`playing-card ${canCapture(SCOPA_TABLE, x) ? "glow" : ""} ${selected === i ? `picked ${phase === "play" ? "flying" : ""}` : ""}`} onClick={() => chooseCard(i)}>{x === 1 ? "A" : x}<small>♠</small></button>)}</div>
         {step === 1 && phase === "score" && <div className="score-pop">+1</div>}
         {step === 1 && phase === "score" && <div className="hero-actions"><button className="btn primary" onClick={() => setStep(2)}>进入第 2 步 →</button></div>}
         {step === 2 && <div className="hero-actions"><button className="btn primary" onClick={() => setStep(3)}>进入第 3 步 →</button></div>}
