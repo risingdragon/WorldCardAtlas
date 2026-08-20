@@ -110,7 +110,7 @@ export default function ScopaPlayPage() {
   return <main className="play-page">
     <nav className="nav"><a className="brand" href="/"><span className="brand-mark">✦</span> WORLD CARD <small>ATLAS</small></a><a className="back-link" href="/games/scopa">← 返回 Scopa 档案</a></nav>
     <section className="play-shell">
-      <div className="play-intro"><p className="eyebrow">SCOPA · INTERACTIVE TUTORIAL</p><h1>三分钟，<br /><em>学会 Scopa。</em></h1><p>选择一张手牌，完成出牌、吃牌和得牌，理解 Scopa 的核心规则。</p><div className="rule-list"><div><b>01</b><span>出牌 → 吃牌 → 得牌</span></div><div><b>02</b><span>无可捕获组合时，出牌留在桌面</span></div><div><b>03</b><span>清空桌面，获得一次 Scopa</span></div></div></div>
+      <div className="play-intro"><p className="eyebrow">SCOPA · INTERACTIVE TUTORIAL</p><h1>三分钟，<br /><em>学会 Scopa。</em></h1><p>选择一张手牌，完成出牌、吃牌和得牌，理解 Scopa 的核心规则。</p><div className="rule-list"><div><b>01</b><span>出牌 → 吃牌 → 得牌</span></div><div><b>02</b><span>无可捕获组合时，出牌留在桌面</span></div><div><b>03</b><span>清空桌面，获得一次 Scopa</span></div></div><a className="text-link tutorial-rules-link" href="/games/scopa/rules">查看完整规则 →</a></div>
       <div className="game-stage">
         <div className="table" aria-live="polite">
           <div className="table-top"><span>SCOPA · 新手桌</span><span>第 {step} / 3 步</span></div>
