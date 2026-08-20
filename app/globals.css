@@ -97,6 +97,7 @@ footer { padding-block: var(--space-6); border-color: var(--line); }
 
 .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
 .playing-card.flying { animation: card-fly .7s ease-in-out forwards; z-index:3; }
+.playing-card { display:grid; place-items:center; text-align:center; }
 .playing-card.capturing { animation: card-capture .65s ease-in-out forwards; }
 .play-shell { grid-template-columns:minmax(0, 35fr) minmax(0, 65fr); }
 .game-stage { width:100%; min-width:0; align-self:start; }
