@@ -110,26 +110,32 @@ footer { padding-block: var(--space-6); border-color: var(--line); }
 .playing-card.capturing { animation: card-capture .65s ease-in-out forwards; }
 .play-shell { grid-template-columns:minmax(0, 35fr) minmax(0, 65fr); }
 .game-stage { width:100%; min-width:0; align-self:start; }
-.game-stage .table { width:960px; height:640px; min-height:640px; overflow:hidden; }
+.game-stage .table { width:960px !important; height:500px !important; min-height:500px !important; max-height:500px !important; align-self:start; overflow:hidden; }
 .game-stage { width:960px; }
 .game-stage { position:relative; padding-top:104px; }
 .tutorial-popover { position:absolute; z-index:5; top:18px; left:50%; width:min(440px, 86%); transform:translateX(-50%); padding:14px 20px; border:1px solid #6e9276; border-radius:12px; background:#1d493b; color:var(--cream); text-align:center; box-shadow:0 10px 24px rgba(9,14,12,.22); }
 .tutorial-popover b { display:block; font-size:16px; font-weight:500; }
 .tutorial-popover small { display:block; margin-top:6px; color:#b9d1ad; font-size:10px; line-height:1.5; }
-.table-cards.center { display:grid; grid-template-columns:repeat(10, 66px); justify-content:center; gap:12px; min-height:230px; align-content:start; }
+.table-cards.center { display:grid; grid-template-columns:repeat(10, 66px); justify-content:center; gap:12px; min-height:130px; align-content:start; }
 .table-cards.center .card-slot { grid-column:var(--slot-column); }
 .table-cards .card-slot { width:66px; height:109px; flex:0 0 66px; }
+.card-slot { position:relative; }
+.card-value-label { position:absolute; left:50%; bottom:-19px; transform:translateX(-50%); color:#b9d1ad; font-size:11px; font-weight:700; line-height:1; pointer-events:none; }
+.card-value-label.flying-label { opacity:0; }
 .tutorial-actions { width:100%; display:flex; justify-content:center; margin-top:20px; min-height:50px; }
 .score-pop { position:absolute; bottom:48px; left:112px; z-index:4; color:var(--lime); font:bold 24px Georgia; pointer-events:none; animation: score-rise .8s ease-out; }
 .score-pulse { display:inline-block; animation: score-pulse .55s ease-out; }
-@keyframes card-fly { from { transform:translateY(-10px); opacity:1; } to { transform:translate(var(--fly-x), -230px); opacity:1; } }
+@keyframes card-fly { from { transform:translate(0, -10px); opacity:1; } to { transform:translate(var(--fly-x), var(--fly-y)); opacity:1; } }
+@keyframes opponent-card-fly { from { transform:translate(0, 0); opacity:1; } to { transform:translate(var(--ai-x), var(--ai-y)); opacity:1; } }
+.playing-card-image.ai-flying { animation:opponent-card-fly .65s ease-in-out forwards; z-index:4; }
 @keyframes card-capture { from { opacity:1; } to { opacity:0; } }
 @keyframes score-rise { from { transform:translateY(18px) scale(.7); opacity:0; } to { transform:translateY(0) scale(1); opacity:1; } }
 @keyframes score-pulse { 50% { transform:scale(1.5); color:#fff; } to { transform:scale(1); } }
 @media(max-width:800px) {
   .game-stage, .game-stage .table { width:100%; }
   .game-stage { padding-top:104px; }
-  .game-stage .table { height:640px; min-height:640px; }
+  .game-stage .table { height:560px !important; min-height:560px !important; max-height:560px !important; }
+  .table-cards.center { min-height:230px; }
   .table-cards.center { width:100%; max-width:380px; grid-template-columns:repeat(5, 66px); row-gap:12px; }
   .table-cards.center .card-slot { grid-column:auto; }
 }

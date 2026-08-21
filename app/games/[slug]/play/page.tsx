@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-html-link-for-pages */
 "use client";
 
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { canCapture, SCOPA_HAND, SCOPA_TABLE } from "../../../../lib/scopa";
 
 type Phase = "choose" | "play" | "capture" | "score" | "ai";
@@ -10,10 +10,10 @@ const cardSuits = ["b", "c", "d", "s"] as const;
 const cardValue = (card: number) => (card % 10) + 1;
 const cardSuit = (card: number) => cardSuits[Math.floor(card / 10) % cardSuits.length];
 
-function CardFace({ value, className = "", small = false }: { value: number; className?: string; small?: boolean }) {
+function CardFace({ value, className = "", small = false, style }: { value: number; className?: string; small?: boolean; style?: CSSProperties }) {
   const face = cardValue(value);
   const suit = cardSuit(value);
-  return <img className={`playing-card-image ${small ? "playing-card-image-small" : ""} ${className}`} src={`/cards/napoletane/${face}${suit}.jpg`} alt={`${face === 1 ? "A" : face} 点牌`} />;
+  return <img style={style} className={`playing-card-image ${small ? "playing-card-image-small" : ""} ${className}`} src={`/cards/napoletane/${face}${suit}.jpg`} alt={`${face === 1 ? "A" : face} 点牌`} />;
 }
 
 function CardBack({ index }: { index: number }) {
@@ -63,6 +63,12 @@ export default function ScopaPlayPage() {
   const [tableCards, setTableCards] = useState<(number | null)[]>(SCOPA_TABLE);
   const [handCards, setHandCards] = useState<(number | null)[]>(SCOPA_HAND);
   const [aiCards, setAiCards] = useState<(number | null)[]>([null, null, null]);
+  const [revealedAiCard, setRevealedAiCard] = useState<number | null>(null);
+  const [aiFlightOffset, setAiFlightOffset] = useState<{ x: number; y: number } | null>(null);
+  const [playerFlightOffset, setPlayerFlightOffset] = useState<{ x: number; y: number } | null>(null);
+  const tableSlotRefs = useRef<Record<number, HTMLDivElement | null>>({});
+  const aiSlotRefs = useRef<Record<number, HTMLDivElement | null>>({});
+  const playerCardRefs = useRef<Record<number, HTMLButtonElement | null>>({});
   const [deckCards, setDeckCards] = useState<number[]>(() => Array.from({ length: 40 }, (_, index) => index));
   const [hasDealtRandomly, setHasDealtRandomly] = useState(false);
 
@@ -108,6 +114,18 @@ export default function ScopaPlayPage() {
     if (phase !== "choose") return;
     const card = handCards[index];
     if (card === null) return;
+    const playerCaptureIndices = getCaptureIndices(tableCards, cardValue(card));
+    const playerTargetIndex = playerCaptureIndices[0] ?? tableCards.findIndex((tableCard) => tableCard === null);
+    const sourceSlot = playerCardRefs.current[index];
+    const targetSlot = tableSlotRefs.current[playerTargetIndex >= 0 ? playerTargetIndex : tableCards.length];
+    if (sourceSlot && targetSlot) {
+      const source = sourceSlot.getBoundingClientRect();
+      const target = targetSlot.getBoundingClientRect();
+      setPlayerFlightOffset({
+        x: target.left + (target.width - source.width) / 2 - source.left,
+        y: target.top + (target.height - source.height) / 2 - source.top,
+      });
+    }
     console.log("Scopa: player selects card", { index, card, tableCards, phase });
     setSelected(index);
     setPlayedValue(card);
@@ -132,6 +150,7 @@ export default function ScopaPlayPage() {
           setSelected(null);
           setPlayedValue(null);
           setPlayedCard(null);
+          setPlayerFlightOffset(null);
           setLastCaptureCount(0);
           window.setTimeout(() => setCaptureSettled(true), 800);
           setPhase("score");
@@ -147,6 +166,7 @@ export default function ScopaPlayPage() {
       setSelected(null);
       setPlayedValue(null);
       setPlayedCard(null);
+      setPlayerFlightOffset(null);
       setShowCaptureGain(true);
       setPhase("score");
     }, phase === "play" ? 700 : 850);
@@ -165,7 +185,10 @@ export default function ScopaPlayPage() {
 
   useEffect(() => {
     if (phase !== "score" || !captureSettled) return;
-    const timer = window.setTimeout(() => setPhase("ai"), 250);
+    const timer = window.setTimeout(() => {
+      setRevealedAiCard(aiCards.find((card): card is number => card !== null) ?? null);
+      setPhase("ai");
+    }, 250);
     return () => window.clearTimeout(timer);
   }, [captureSettled, phase, round]);
 
@@ -176,6 +199,25 @@ export default function ScopaPlayPage() {
       const aiCard = aiCardIndex >= 0 ? aiCards[aiCardIndex] : null;
       if (aiCard === null) return;
       const aiCaptureIndices = getCaptureIndices(tableCards, cardValue(aiCard));
+      const targetIndex = aiCaptureIndices[0] ?? tableCards.findIndex((card) => card === null);
+      const targetSlot = tableSlotRefs.current[targetIndex >= 0 ? targetIndex : tableCards.length];
+      const sourceSlot = aiSlotRefs.current[aiCardIndex];
+      if (sourceSlot && targetSlot) {
+        const source = sourceSlot.getBoundingClientRect();
+        const target = targetSlot.getBoundingClientRect();
+        const offset = {
+          x: target.left + (target.width - source.width) / 2 - source.left,
+          y: target.top + (target.height - source.height) / 2 - source.top,
+        };
+        console.log("Scopa: AI flight geometry", JSON.stringify({
+          source: { left: source.left, top: source.top, width: source.width, height: source.height },
+          target: { left: target.left, top: target.top, width: target.width, height: target.height },
+          offset,
+          table: (() => { const rect = document.querySelector(".game-stage .table")?.getBoundingClientRect(); return rect ? { left: rect.left, top: rect.top, width: rect.width, height: rect.height } : null; })(),
+          tableComputed: (() => { const element = document.querySelector(".game-stage .table"); if (!element) return null; const style = getComputedStyle(element); return { height: style.height, minHeight: style.minHeight, maxHeight: style.maxHeight, alignSelf: style.alignSelf, boxSizing: style.boxSizing }; })(),
+        }, null, 2));
+        setAiFlightOffset(offset);
+      }
       if (aiCaptureIndices.length > 0) {
         setAiCapturedCount((count) => count + aiCaptureIndices.length + 1);
       }
@@ -189,6 +231,8 @@ export default function ScopaPlayPage() {
       });
       setAiHandCount((count) => Math.max(0, count - 1));
       setAiCards((cards) => cards.map((card, index) => index === aiCardIndex ? null : card));
+      setRevealedAiCard(null);
+      setAiFlightOffset(null);
       // AI 的牌落桌后，才交还控制权给玩家。
       window.setTimeout(() => {
       setSelected(null);
@@ -249,9 +293,9 @@ export default function ScopaPlayPage() {
         <div className="tutorial-popover" aria-live="polite"><b>{instruction}</b><small>{instructionDetail}</small></div>
         <div className="table" aria-live="polite">
           <div className="table-top"><span>SCOPA · 教学局</span><span>{phase === "ai" ? "对方回合" : "你的回合"}</span></div>
-          <div className="opponent-hand" aria-label={`对手得牌 ${aiCapturedCount} 张，剩余手牌 ${aiHandCount} 张`}><span>对手得牌 · {aiCapturedCount} 张</span><div className="table-cards">{[0, 1, 2].map((index) => <div className="card-slot" key={`opponent-${index}`}>{index < aiHandCount && <CardBack index={index} />}</div>)}</div></div>
-          <div className="table-cards center">{tableCards.map((x, i) => <div className="card-slot" style={{ "--slot-column": Math.min(i + 4, 10) } as CSSProperties} key={`table-${i}`}>{x !== null && <CardFace value={x} className={phase === "capture" && captureIndices.includes(i) ? "capturing" : ""} />}</div>)}</div>
-          <div className="table-cards hand">{handCards.map((x, i) => <div className="card-slot" key={`hand-${i}`}>{x !== null && <button aria-label={`选择 ${cardValue(x) === 1 ? "A" : cardValue(x)} 点牌`} style={selected === i ? { "--fly-x": `${(((captureTarget === null ? (tableCards.findIndex((card) => card === null) >= 0 ? tableCards.findIndex((card) => card === null) : tableCards.length) : captureTarget) + 4 - 5.5) * 78) - ((i - (handCards.length - 1) / 2) * 78)}px` } as CSSProperties : undefined} className={`playing-card ${canCapture(activeTableCards, cardValue(x)) ? "glow" : ""} ${selected === i ? `picked ${phase === "play" || phase === "capture" ? "flying" : ""}` : ""}`} onClick={() => chooseCard(i)}><CardFace value={x} small /></button>}</div>)}</div>
+          <div className="opponent-hand" aria-label={`对手得牌 ${aiCapturedCount} 张，剩余手牌 ${aiHandCount} 张`}><span>对手得牌 · {aiCapturedCount} 张</span><div className="table-cards">{aiCards.map((card, index) => <div className="card-slot" ref={(node) => { aiSlotRefs.current[index] = node; }} key={`opponent-${index}`}>{card !== null && (card === revealedAiCard ? <CardFace value={card} className={phase === "ai" ? "ai-flying" : ""} style={aiFlightOffset ? { "--ai-x": `${aiFlightOffset.x}px`, "--ai-y": `${aiFlightOffset.y}px` } as CSSProperties : undefined} /> : <CardBack index={index} />)}</div>)}</div></div>
+          <div className="table-cards center">{Array.from({ length: 10 }, (_, i) => tableCards[i] ?? null).map((x, i) => <div className="card-slot" ref={(node) => { tableSlotRefs.current[i] = node; }} style={{ "--slot-column": Math.min(i + 4, 10) } as CSSProperties} key={`table-${i}`}>{x !== null && <><CardFace value={x} className={phase === "capture" && captureIndices.includes(i) ? "capturing" : ""} /><span className="card-value-label">{cardValue(x)}</span></>}</div>)}</div>
+          <div className="table-cards hand">{handCards.map((x, i) => <div className="card-slot" key={`hand-${i}`}>{x !== null && <><button ref={(node) => { playerCardRefs.current[i] = node; }} aria-label={`选择 ${cardValue(x)} 点牌`} style={selected === i && playerFlightOffset ? { "--fly-x": `${playerFlightOffset.x}px`, "--fly-y": `${playerFlightOffset.y}px` } as CSSProperties : undefined} className={`playing-card ${canCapture(activeTableCards, cardValue(x)) ? "glow" : ""} ${selected === i ? `picked ${phase === "play" || phase === "capture" ? "flying" : ""}` : ""}`} onClick={() => chooseCard(i)}><CardFace value={x} small /></button><span className={`card-value-label ${selected === i && (phase === "play" || phase === "capture") ? "flying-label" : ""}`}>{cardValue(x)}</span></>}</div>)}</div>
           {(round === 1 || round === 3) && phase === "score" && showCaptureGain && <div className="score-pop">+{lastCaptureCount} 张</div>}
           <div className="table-bottom"><span>得牌 <b className={phase === "score" ? "score-pulse" : ""}>{capturedCount}</b> · Scopa <b>{scopaCount}</b></span><span>牌堆 <b>{deckRemaining}</b> 张</span></div>
         </div>
