@@ -110,16 +110,24 @@ footer { padding-block: var(--space-6); border-color: var(--line); }
 .playing-card.capturing { animation: card-capture .65s ease-in-out forwards; }
 .play-shell { grid-template-columns:minmax(0, 35fr) minmax(0, 65fr); }
 .game-stage { width:100%; min-width:0; align-self:start; }
-.game-stage .table { width:100%; height:500px; min-height:500px; overflow:hidden; }
+.game-stage .table { width:960px; height:640px; min-height:640px; overflow:hidden; }
+.game-stage { width:960px; }
+.table-cards.center { display:grid; grid-template-columns:repeat(10, 66px); justify-content:center; gap:12px; min-height:230px; align-content:start; }
+.table-cards.center .card-slot { grid-column:var(--slot-column); }
 .table-cards .card-slot { width:66px; height:109px; flex:0 0 66px; }
 .tutorial-actions { width:100%; display:flex; justify-content:center; margin-top:20px; min-height:50px; }
 .score-pop { position:absolute; bottom:48px; left:112px; z-index:4; color:var(--lime); font:bold 24px Georgia; pointer-events:none; animation: score-rise .8s ease-out; }
 .score-pulse { display:inline-block; animation: score-pulse .55s ease-out; }
-@keyframes card-fly { from { transform:translateY(-10px); opacity:1; } to { transform:translate(var(--fly-x), -130px); opacity:1; } }
+@keyframes card-fly { from { transform:translateY(-10px); opacity:1; } to { transform:translate(var(--fly-x), -230px); opacity:1; } }
 @keyframes card-capture { from { opacity:1; } to { opacity:0; } }
 @keyframes score-rise { from { transform:translateY(18px) scale(.7); opacity:0; } to { transform:translateY(0) scale(1); opacity:1; } }
 @keyframes score-pulse { 50% { transform:scale(1.5); color:#fff; } to { transform:scale(1); } }
-@media(max-width:800px) { .game-stage .table { height:500px; min-height:500px; } }
+@media(max-width:800px) {
+  .game-stage, .game-stage .table { width:100%; }
+  .game-stage .table { height:640px; min-height:640px; }
+  .table-cards.center { width:100%; max-width:380px; grid-template-columns:repeat(5, 66px); row-gap:12px; }
+  .table-cards.center .card-slot { grid-column:auto; }
+}
 @media(max-width:480px) { .score-pop { left:94px; } }
 .archive-header, .game-detail { background: var(--ink); color: var(--cream); }
 .archive-header h1, .game-detail h1 { font-size: clamp(52px, 8vw, 92px); letter-spacing: -.06em; margin: 0 0 18px; }
