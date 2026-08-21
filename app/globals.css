@@ -100,6 +100,11 @@ footer { padding-block: var(--space-6); border-color: var(--line); }
 .playing-card { display:grid; place-items:center; text-align:center; width:66px; height:109px; padding:0; overflow:visible; }
 .playing-card-image { width:66px; aspect-ratio:331 / 547; height:auto; object-fit:cover; border-radius:6px; display:block; box-shadow:0 4px 8px #193d2f; }
 .playing-card-image-small { width:66px; aspect-ratio:331 / 547; height:auto; border-radius:6px; }
+.opponent-hand { display:grid; gap:8px; justify-items:center; margin:8px 0 4px; }
+.opponent-hand > span { color:#9fc19c; font-size:10px; letter-spacing:.08em; }
+.playing-card-back { filter:saturate(.8) brightness(.84); }
+.opponent-hand .playing-card-image { width:54px; }
+.opponent-hand .card-slot { width:54px; height:90px; }
 .playing-card-image.capturing { animation: card-capture .65s ease-in-out forwards; }
 .playing-card-image-small { pointer-events:none; }
 .playing-card.capturing { animation: card-capture .65s ease-in-out forwards; }
