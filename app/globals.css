@@ -112,6 +112,10 @@ footer { padding-block: var(--space-6); border-color: var(--line); }
 .game-stage { width:100%; min-width:0; align-self:start; }
 .game-stage .table { width:960px; height:640px; min-height:640px; overflow:hidden; }
 .game-stage { width:960px; }
+.game-stage { position:relative; padding-top:104px; }
+.tutorial-popover { position:absolute; z-index:5; top:18px; left:50%; width:min(440px, 86%); transform:translateX(-50%); padding:14px 20px; border:1px solid #6e9276; border-radius:12px; background:#1d493b; color:var(--cream); text-align:center; box-shadow:0 10px 24px rgba(9,14,12,.22); }
+.tutorial-popover b { display:block; font-size:16px; font-weight:500; }
+.tutorial-popover small { display:block; margin-top:6px; color:#b9d1ad; font-size:10px; line-height:1.5; }
 .table-cards.center { display:grid; grid-template-columns:repeat(10, 66px); justify-content:center; gap:12px; min-height:230px; align-content:start; }
 .table-cards.center .card-slot { grid-column:var(--slot-column); }
 .table-cards .card-slot { width:66px; height:109px; flex:0 0 66px; }
@@ -124,6 +128,7 @@ footer { padding-block: var(--space-6); border-color: var(--line); }
 @keyframes score-pulse { 50% { transform:scale(1.5); color:#fff; } to { transform:scale(1); } }
 @media(max-width:800px) {
   .game-stage, .game-stage .table { width:100%; }
+  .game-stage { padding-top:104px; }
   .game-stage .table { height:640px; min-height:640px; }
   .table-cards.center { width:100%; max-width:380px; grid-template-columns:repeat(5, 66px); row-gap:12px; }
   .table-cards.center .card-slot { grid-column:auto; }

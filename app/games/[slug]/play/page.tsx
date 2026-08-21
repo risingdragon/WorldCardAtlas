@@ -219,39 +219,36 @@ export default function ScopaPlayPage() {
   }, [phase, round]);
 
   const instruction = phase === "ai"
-    ? "对方正在出牌……"
-    : round === 2
-    ? phase === "choose"
-      ? "选择一张手牌，按规则决定是否收牌。"
+    ? "对手正在出牌……"
+    : phase === "choose"
+      ? "轮到你了，选择一张手牌。"
       : phase === "play"
-        ? "正在判断这张牌可以收走哪些牌。"
+        ? captureIndices.length > 0
+          ? `这张 ${selectedValue === 1 ? "A" : selectedValue} 可以收牌。`
+          : "这张牌无法收牌，会留在场上。"
         : phase === "capture"
-          ? "选择的牌正在收走桌面上的组合。"
-          : "出牌完成，接下来轮到对手。"
-    : round === 3
-      ? phase === "choose"
-        ? "选择手牌 6，吃掉桌面上的 A、2、3。"
-        : phase === "play"
-          ? "6 可以捕获 A + 2 + 3。"
-          : phase === "capture"
-            ? "桌面即将被清空——这就是 Scopa！"
-            : "Scopa！你清空了桌面，获得 1 次 Scopa。"
-      : phase === "choose"
-        ? "从手牌中选择一张牌"
-        : phase === "play"
-          ? "出牌成功！接下来会自动吃牌。"
-          : phase === "capture"
-            ? "选择的牌可以吃掉桌面上的组合。"
-            : "捕获完成！这些牌已放入你的得牌区。";
+          ? "正在把牌收进你的得牌区……"
+          : lastCaptureCount > 0
+            ? `收牌完成，得到 ${lastCaptureCount} 张牌。`
+            : "牌已放入场牌，接下来轮到对手。";
+  const instructionDetail = phase === "ai"
+    ? "对手会按同样的规则判断是否收牌。"
+    : phase === "choose"
+      ? "有同点数或点数和相等的组合时，可以收走它们。"
+      : phase === "play" && captureIndices.length === 0
+        ? "没有可收的组合，出牌会成为新的场牌。"
+        : phase === "capture"
+          ? "收走同点数牌，或点数和相等的一组牌。"
+          : "牌局继续，轮流出牌。";
 
   return <main className="play-page">
     <nav className="nav"><a className="brand" href="/"><span className="brand-mark">✦</span> WORLD CARD <small>ATLAS</small></a><a className="back-link" href="/games/scopa">← 返回 Scopa 档案</a></nav>
     <section className="play-shell">
       <div className="play-intro"><p className="eyebrow">SCOPA · COMPLETE TEACHING ROUND</p><h1>坐下来，<br /><em>完整玩一局。</em></h1><p>跟着这一局牌自然推进：你会遇到捕获、落牌和清空桌面三种关键时刻。</p><div className="rule-list"><div><b>01</b><span>先出牌，再决定如何捕获</span></div><div><b>02</b><span>无法捕获时，牌会留在桌面</span></div><div><b>03</b><span>清空桌面，获得一次 Scopa</span></div></div><a className="text-link tutorial-rules-link" href="/games/scopa/rules">查看完整规则 →</a></div>
       <div className="game-stage">
+        <div className="tutorial-popover" aria-live="polite"><b>{instruction}</b><small>{instructionDetail}</small></div>
         <div className="table" aria-live="polite">
           <div className="table-top"><span>SCOPA · 教学局</span><span>{phase === "ai" ? "对方回合" : "你的回合"}</span></div>
-          <div className="instruction">{instruction}<small>{phase === "ai" ? "对方从手牌中打出一张牌。" : round === 2 ? "这一手会展示：无法捕获时，出牌会留在桌面。" : round === 3 ? "这一手会展示：捕获全部场牌就是 Scopa。" : "从这里开始你的第一手牌。"}</small></div>
           <div className="opponent-hand" aria-label={`对手得牌 ${aiCapturedCount} 张，剩余手牌 ${aiHandCount} 张`}><span>对手得牌 · {aiCapturedCount} 张</span><div className="table-cards">{[0, 1, 2].map((index) => <div className="card-slot" key={`opponent-${index}`}>{index < aiHandCount && <CardBack index={index} />}</div>)}</div></div>
           <div className="table-cards center">{tableCards.map((x, i) => <div className="card-slot" style={{ "--slot-column": Math.min(i + 4, 10) } as CSSProperties} key={`table-${i}`}>{x !== null && <CardFace value={x} className={phase === "capture" && captureIndices.includes(i) ? "capturing" : ""} />}</div>)}</div>
           <div className="table-cards hand">{handCards.map((x, i) => <div className="card-slot" key={`hand-${i}`}>{x !== null && <button aria-label={`选择 ${cardValue(x) === 1 ? "A" : cardValue(x)} 点牌`} style={selected === i ? { "--fly-x": `${(((captureTarget === null ? (tableCards.findIndex((card) => card === null) >= 0 ? tableCards.findIndex((card) => card === null) : tableCards.length) : captureTarget) + 4 - 5.5) * 78) - ((i - (handCards.length - 1) / 2) * 78)}px` } as CSSProperties : undefined} className={`playing-card ${canCapture(activeTableCards, cardValue(x)) ? "glow" : ""} ${selected === i ? `picked ${phase === "play" || phase === "capture" ? "flying" : ""}` : ""}`} onClick={() => chooseCard(i)}><CardFace value={x} small /></button>}</div>)}</div>
