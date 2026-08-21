@@ -1,0 +1,5 @@
+Card artwork source: Scopa by Marco Scarpetta (https://github.com/OMerkel/scopa_marco)
+The Napoletane JPG files are identified by the source project as public-domain
+images from Wikimedia Commons: https://commons.wikimedia.org/wiki/Category: Naples_deck
+
+The source project is distributed under the GNU GPL v3 for its program files.

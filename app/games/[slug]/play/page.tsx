@@ -6,6 +6,13 @@ import { canCapture, SCOPA_HAND, SCOPA_TABLE } from "../../../../lib/scopa";
 
 type Phase = "choose" | "play" | "capture" | "score";
 
+const cardSuits = ["b", "c", "d", "s"] as const;
+
+function CardFace({ value, index, className = "", small = false }: { value: number; index: number; className?: string; small?: boolean }) {
+  const face = value === 1 ? 1 : value;
+  return <img className={`playing-card-image ${small ? "playing-card-image-small" : ""} ${className}`} src={`/cards/napoletane/${face}${cardSuits[index % cardSuits.length]}.jpg`} alt={`${face === 1 ? "A" : face} 点牌`} />;
+}
+
 export default function ScopaPlayPage() {
   const [selected, setSelected] = useState<number | null>(null);
   const [step, setStep] = useState(1);
@@ -115,8 +122,8 @@ export default function ScopaPlayPage() {
         <div className="table" aria-live="polite">
           <div className="table-top"><span>SCOPA · 新手桌</span><span>第 {step} / 3 步</span></div>
           <div className="instruction">{instruction}<small>{step === 2 ? "目标：理解无法捕获时，打出的牌会留在桌面上。" : step === 3 ? "目标：捕获全部场牌，清空桌面。" : "目标：完成一次完整的出牌、吃牌和得牌。"}</small></div>
-          <div className="table-cards center">{tableCards.map((x, i) => <div className="card-slot" key={`table-${i}`}>{x !== null && <div className={`playing-card ${x === 1 ? "red" : ""} ${phase === "capture" && captureIndices.includes(i) ? "capturing" : ""}`}>{x === 1 ? "A" : x}<small>♠</small></div>}</div>)}</div>
-          <div className="table-cards hand">{handCards.map((x, i) => <div className="card-slot" key={`hand-${i}`}>{x !== null && <button aria-label={`选择 ${x === 1 ? "A" : x} 点牌`} style={selected === i && captureTarget !== null ? { "--fly-x": `${(captureTarget - i) * 78 - ((tableCards.length - handCards.length) * 78) / 2}px` } as CSSProperties : undefined} className={`playing-card ${step === 1 && canCapture(activeTableCards, x) ? "glow" : ""} ${selected === i ? `picked ${phase === "play" || phase === "capture" ? "flying" : ""}` : ""}`} onClick={() => chooseCard(i)}>{x === 1 ? "A" : x}<small>♠</small></button>}</div>)}</div>
+          <div className="table-cards center">{tableCards.map((x, i) => <div className="card-slot" key={`table-${i}`}>{x !== null && <CardFace value={x} index={i} className={phase === "capture" && captureIndices.includes(i) ? "capturing" : ""} />}</div>)}</div>
+          <div className="table-cards hand">{handCards.map((x, i) => <div className="card-slot" key={`hand-${i}`}>{x !== null && <button aria-label={`选择 ${x === 1 ? "A" : x} 点牌`} style={selected === i && captureTarget !== null ? { "--fly-x": `${(captureTarget - i) * 78 - ((tableCards.length - handCards.length) * 78) / 2}px` } as CSSProperties : undefined} className={`playing-card ${step === 1 && canCapture(activeTableCards, x) ? "glow" : ""} ${selected === i ? `picked ${phase === "play" || phase === "capture" ? "flying" : ""}` : ""}`} onClick={() => chooseCard(i)}><CardFace value={x} index={i} small /></button>}</div>)}</div>
           {(step === 1 || step === 3) && phase === "score" && showCaptureGain && <div className="score-pop">+{lastCaptureCount} 张</div>}
           <div className="table-bottom"><span>得牌 <b className={phase === "score" ? "score-pulse" : ""}>{capturedCount}</b> · Scopa <b>{scopaCount}</b></span><span>AI · 意大利奶奶 🤖</span></div>
         </div>
